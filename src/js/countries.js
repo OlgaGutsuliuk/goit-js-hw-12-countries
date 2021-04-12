@@ -1,44 +1,46 @@
 import countriesTamplate from '../tamplates/countries.hbs'
 import countriesList from '../tamplates/countriesList.hbs'
 import api from './fetchCountries.js'
-import {error, defaultModules} from '@pnotify/core'
-import
-
+import inputError from './error.js'
+import debounce from 'lodash.debounce'
 
 
 const input = document.querySelector('input')
-input.addEventListener('input', inputSubmit)
+input.addEventListener('input', debounce(inputSubmit, 500))
 
 function inputSubmit(e){
-const inputValue = e.target.value
-api.fetchCountries(inputValue)
-.then(data=>{
+  const inputValue = e.target.value
+  api.fetchCountries(inputValue)
+  .then(checkData)
+  clearCountries()
+}
+
+function checkData(data){
   if (data.length ===1){
-  renderCountries(data)  
+    renderCountries(data)  
   }
   else if(data.length>= 2 && data.length<=10){
-  markupCountriesList(data)    
+    markupCountriesList(data)    
   }
-  else if(data.length> 10){
-error({
-text: 'Notice me, senpai!'
-});
+  else if(data.length > 10){
+    inputError.errorSpecific()
+  }
 }
-}).catch(errorCountries)
+
+function clearCountries(){
+  const countryMarkup = document.querySelector('.countries').innerHTML = '';
 }
+
 function renderCountries(data){
-    const contryMarkup = document.querySelector('.countries').innerHTML = countriesTamplate(data)   
+  const countryMarkup = document.querySelector('.countries').innerHTML = countriesTamplate(data)   
 }
 
 function markupCountriesList(data){
-    const contryMarkupList = document.querySelector('.countries').innerHTML = countriesList(data)  
+  const countryMarkupList = document.querySelector('.countries').innerHTML = countriesList(data)  
 }
 
-function errorCountries(){ 
-error({
-text: 'help'
-});
-}
+
+
 
 
 
